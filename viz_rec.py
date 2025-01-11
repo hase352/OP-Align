@@ -3,6 +3,9 @@ import numpy as np
 import open3d as o3d
 from scipy.spatial.transform import Rotation as sciR
 
+import os
+from glob import glob
+
 def hat(phi):
     phi_x = phi[..., 0]
     phi_y = phi[..., 1]
@@ -67,10 +70,19 @@ def drct_rotation(drct):
     return ret
 
 def main(path:str):
-    f = np.load(path, allow_pickle=True)['arr_0'].item()
+    f = np.load(path, allow_pickle=True)['arr_0'].item()   
+    print(f.keys(), f['idx'])
 
+    input = f['input'][0].transpose(1,0)
+    inputa = o3d.geometry.PointCloud()
+    inputa.points = o3d.utility.Vector3dVector(input)
+    
+    print(max(input[:,0]), min(input[:,0]),max(input[:,1]), min(input[:,1]), max(input[:,2]), min(input[:,2]))
+    
+    
     input_r = sciR.random().as_matrix()
     input_align = f['input_align'][0].transpose(1,0)
+    print(max(input_align[:,0]), min(input_align[:,0]))
     input_seg = f['input_seg'][0]
     input_color = torch.zeros_like(input_align) * 0.5
     input_color[:,0], input_color[:,1], input_color[:,2] = input_seg[0,:], input_seg[1,:], 0 if input_seg.shape[0]== 2 else input_seg[2,:]
@@ -93,6 +105,8 @@ def main(path:str):
     #input_pcl.rotate(input_r, center=False)
 
     align2_0 = f['input_align_2'][0,0].transpose(1,0)
+    #print(align2_0)
+    
     align2_0_color = torch.ones_like(input_align) * 0.75
     align2_0_color[:,0] = torch.maximum(input_seg[0,:], align2_0_color[:,0])
     align2_0_color[align2_0_color[:,0]!=0.75,1], align2_0_color[align2_0_color[:,0]!=0.75,2] = 0, 0
@@ -136,9 +150,19 @@ def main(path:str):
     recon_pcl.points = o3d.utility.Vector3dVector(recon)
     recon_pcl.colors = o3d.utility.Vector3dVector(recon_color)
 
-    o3d.visualization.draw_geometries([input_pcl, *input_joints])
-    o3d.visualization.draw_geometries([align2_0_pcl, align2_1_pcl, *recon_joints])
-    o3d.visualization.draw_geometries([recon_pcl, *recon_joints])
+    o3d.visualization.draw_geometries([inputa], window_name="input")
+    o3d.visualization.draw_geometries([input_pcl, *recon_joints],window_name="object level align")
+    o3d.visualization.draw_geometries([align2_0_pcl, align2_1_pcl, *recon_joints], window_name="part level align")
+    o3d.visualization.draw_geometries([recon_pcl, *recon_joints],window_name="recon")
 
 if __name__ == "__main__":
-    main('log/laptop_test/model_20241104_102419/viz/00000.npz')
+    dataset = "dataset/pc/partial/safe/test/101363_50p_joint_0.pt"
+    instance_name_list = glob(os.path.join('dataset','pc','partial', 'safe', 'test', '*.pt'))  
+    index = -1 
+    if dataset in instance_name_list:
+        index = instance_name_list.index(dataset)
+    print("index:",index)
+    file_paths = glob("log/safe-50_test/model_20241231_123155/viz/101619050.npz")
+    for file_path in file_paths:
+        print(file_path)
+        main(file_path)

@@ -18,13 +18,15 @@ class LightDataset(data.Dataset):
         self.npoints = npoints
         self.shape_type = shape_type
         self.split = split
-        self.partial = partial
+        #self.partial = partial
+        self.partial = True
         self.args = args
         if self.partial:
             self.shape_root = os.path.join(self.root, 'partial', shape_type)
         else:
             self.shape_root = os.path.join(self.root, 'full', shape_type)
-        self.instance_list = glob(os.path.join(self.shape_root, split, '*.pt'))
+        self.instance_list = glob(os.path.join(self.shape_root, "test-50", '*.pt'))
+        print(self.shape_root, split)
 
         if len(self.instance_list) == 0:
             print("Check the category name!")

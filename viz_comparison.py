@@ -156,8 +156,8 @@ def main(f_list, test_data):
         break
     
 def viz_comparison_syn():
-    viz = np.load("log/safe-50_test/model_20250111_143002/viz/101612050.npz", allow_pickle=True)['arr_0'].item()
-    ori = torch.load("dataset/pc/partial/safe/test-50/101612_50p_joint_0.pt")
+    viz = np.load("log/safe-50_test/viz/101619050.npz", allow_pickle=True)['arr_0'].item()
+    ori = torch.load("dataset/pc/partial/safe/test-50/101619_50p_joint_0.pt")
     
     viz_pc = viz['input'][0].permute(1,0)
     print("max: ", max(viz_pc[:,0]), max(viz_pc[:,1]), max(viz_pc[:,2]))

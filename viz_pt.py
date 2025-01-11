@@ -55,8 +55,8 @@ def viz_pt(file_path):
 
     # Open3D PointCloud オブジェクトを作成
     point_cloud = o3d.geometry.PointCloud()
-    point_cloud.points = o3d.utility.Vector3dVector(pc_np[label_np==1])
-    point_cloud.colors = o3d.utility.Vector3dVector(rgb_colors[label_np==1])
+    point_cloud.points = o3d.utility.Vector3dVector(pc_np)
+    point_cloud.colors = o3d.utility.Vector3dVector(rgb_colors)
     
     
     # 点群を可視化
@@ -75,8 +75,8 @@ def eval_result(csv_path):
 if __name__ == "__main__":
     
     file_paths = glob.glob("/home/akrobo/research/op_align/dataset/pc/partial/safe/test-50/*")
-    for file_path in file_paths:
-        viz_pt(file_path)
+    #for file_path in file_paths:
+    #    viz_pt(file_path)
     
-    viz_pt("dataset/pc/partial/safe/test-op/101.pt")
+    viz_pt("dataset/pc/partial/safe/test-100/101594_100p_joint_0.pt")
     #eval_result("log/safe-50_test/model_20241231_123155/csv/safe-50_eval.csv")

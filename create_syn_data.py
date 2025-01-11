@@ -21,7 +21,7 @@ def create_syn_data(points, labels, data_info: str, direction, pivot):
     point_cloud.points = o3d.utility.Vector3dVector(points)
 
     # 3. ダウンサンプリング
-    voxel_size = 0.03  # ボクセルサイズ
+    voxel_size = 0.06  # ボクセルサイズ
     downsampled_point_cloud = point_cloud.voxel_down_sample(voxel_size=voxel_size)
 
     # 4. ダウンサンプリング後の点群をNumPy配列に変換

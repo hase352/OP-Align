@@ -2,19 +2,19 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def scatter(csv_file_path):
+def scatter(csv_file_path, shape_id):
     data = pd.read_csv(csv_file_path)
-    iou = data["seg_1"].values
+    iou = data["iou_sum"].values
     confidence = data["confidence"].values
     # 相関係数の計算
     correlation_coefficient = np.corrcoef(iou, confidence)[0, 1]
 
     # 散布図の作成
     plt.figure(figsize=(8, 6))
-    plt.scatter(iou, confidence, color='blue', alpha=0.7, label="Data Points")
-    plt.title("Scatter Plot of IoU vs Confidence")
-    plt.xlabel("IoU")
-    plt.ylabel("Confidence")
+    plt.scatter(confidence, iou, color='blue', alpha=0.7, label="Data Points")
+    plt.title(f"Scatter Plot of Confidence vs IoU shape_id: {shape_id}")
+    plt.ylabel("IoU")
+    plt.xlabel("Confidence")
     plt.grid(True)
 
     # 相関係数をプロット上に表示
@@ -29,4 +29,4 @@ def scatter(csv_file_path):
 
 
 if __name__  == "__main__":
-    scatter("log/safe-50_test/model_20250111_192122/csv/safe-50_eval.csv")
+    scatter("log/safe-101564_test/model_20250112_183516/csv/safe-101564_eval.csv", "101564")

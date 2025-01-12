@@ -137,7 +137,7 @@ class Art_Metric(torch.nn.Module):
             pred_pose_align[:,:,:3,:] = torch.concat([pred_rotation_align, pred_trans_align.unsqueeze(-1)], dim=-1)
 
             rotation_error, trans_error = self.evaluation_pose(gt_pose, pred_rotation_align, pred_trans_align, gt_expand)#B,P,  B,P
-            segmentation_error = self.evaluation_segmentation(gt_segmentation, S_segmentation, self.non_valid_exist)#B,P
+            segmentation_error, iou_sum = self.evaluation_segmentation(gt_segmentation, S_segmentation, self.non_valid_exist)#B,P
             joint_error, drct_error = self.evaluation_joint(gt_joint[:,:,:3], gt_joint[:,:,3:], S_joint_input, S_drct_input, gt_expand)#B,J
             viz_f = {
                 'input': S_input.detach().cpu(),
@@ -159,6 +159,7 @@ class Art_Metric(torch.nn.Module):
                 'recon_drct': I_drct.detach().cpu(),
                 'recon_angl': I_angl.detach().cpu(),
 
+                'iou_sum' : iou_sum.detach().cpu()
             }
             return segmentation_error, joint_error, drct_error, rotation_error, trans_error, viz_f
         
@@ -476,6 +477,7 @@ class Art_Metric(torch.nn.Module):
         B,P = pred_seg.shape[0], pred_seg.shape[1]
         hard_seg = torch.argmax(pred_seg, dim=1)#B,N
         iou_list = torch.zeros_like(pred_seg[:,:,0])#B,P
+        intersection_union = torch.zeros(B,P,2)
 
         for b in range(B):
             for p in range(P):
@@ -487,7 +489,9 @@ class Art_Metric(torch.nn.Module):
                     valid_hard_seg = hard_seg[b]
                     valid_gt_seg = gt_seg[b]
                 intersection = torch.logical_and(valid_hard_seg == p, valid_gt_seg == p).sum(-1)
+                intersection_union[b,p,0] = intersection
                 union = torch.logical_or(valid_hard_seg == p, valid_gt_seg == p).sum(-1)
+                intersection_union[b,p,1] = union
                 iou = intersection / union
                 if torch.isnan(iou):
                     print('detect Nan in Segmentation')
@@ -508,7 +512,8 @@ class Art_Metric(torch.nn.Module):
                     iou = iou2 if iou2 > iou else iou
                 '''
                 iou_list[b,p] = iou
-        return iou_list
+        iou_sum = torch.sum(intersection_union[:,:,0]) / torch.sum(intersection_union[:,:,1])
+        return iou_list, iou_sum
     
     def evaluation_pose(self, gt_pose, pred_rotation, pred_translation, gt_expand=None):
         B,P = gt_pose.shape[0], gt_pose.shape[1]

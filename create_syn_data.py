@@ -11,7 +11,7 @@ sapienでlabelを取ってくるが、label==2のlink がbaseにくっついて�
 """
 
 
-def create_syn_data(points, labels, data_info: str, direction, pivot):
+def create_syn_data(points, labels, data_info: str, direction, pivot, per_object=False):
     data = torch.load("/home/akrobo/research/op_align/dataset/pc/partial/safe/0.pt")#必要ないデータを埋めるため
     shape_id = int(data_info.split("_")[0])
     open_percentage = int(re.findall(r'\d+',  data_info.split("_")[1])[0])
@@ -66,12 +66,21 @@ def create_syn_data(points, labels, data_info: str, direction, pivot):
     print(direction, pivot)
     data['pc'] = torch.from_numpy(sampled_points)
     data['idx'] = torch.tensor([file_idx], dtype=torch.int64)
+    print(torch.tensor([file_idx], dtype=torch.int64))
     data['label'] = torch.from_numpy(sampled_labels)
     data['part_axis'] = torch.from_numpy(np.array([pivot.astype(np.float32)]))
     data['part_pv_point'] = torch.from_numpy(np.array([direction.astype(np.float32)]))
     print([torch.from_numpy(pivot.astype(np.float32))])
-    torch.save(data, os.path.join("/home/akrobo/research/op_align/real/pc/partial/safe", "test-" + str(open_percentage) , data_info + ".pt"))
-    print("Saved dictionary to test-", open_percentage, "/", data_info + ".pt")
+    if per_object == False:
+        if not os.path.exists(os.path.join("/home/akrobo/research/op_align/real/pc/partial/safe", "test-" + str(open_percentage))):
+            os.mkdir(os.path.join("/home/akrobo/research/op_align/real/pc/partial/safe", "test-" + str(open_percentage)))
+        torch.save(data, os.path.join("/home/akrobo/research/op_align/real/pc/partial/safe", "test-" + str(open_percentage) , data_info + ".pt"))
+        print("Save testdata: ", data_info + ".pt  to  safe/test-"+str(open_percentage))
+    else:
+        if not os.path.exists(os.path.join("/home/akrobo/research/op_align/real/pc/partial/safe-object", str(shape_id))):
+            os.mkdir(os.path.join("/home/akrobo/research/op_align/real/pc/partial/safe-object", str(shape_id)))
+        torch.save(data, os.path.join("/home/akrobo/research/op_align/real/pc/partial/safe-object", str(shape_id), data_info + ".pt"))
+        print("Save testdata: ", data_info + ".pt  to  safe-object/"+str(shape_id))
     
 def check():
     data = torch.load("/home/akrobo/research/op_align/dataset/pc/partial/safe/test/0.pt")#必要ないデータを埋めるため

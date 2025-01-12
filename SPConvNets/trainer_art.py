@@ -328,7 +328,7 @@ def val(dataset_test, dataset_train, model, metric, device, logger):
     #Test Step
     logger.log('Testing','Running test set.')
     torch.cuda.reset_peak_memory_stats()
-    all_seg, all_joint, all_drct, all_trans, all_rotation, all_idx, all_time, all_viz, all_confidence = [], [], [], [], [], [], [], [], []
+    all_seg, all_joint, all_drct, all_trans, all_rotation, all_shape_id, all_idx, all_time, all_viz, all_iou_sum, all_confidence = [], [], [], [], [], [], [], [], [], [], []
     for it, data in enumerate(tqdm(dataset_test, miniters=100, maxinterval=600)):
         pc = data['pc'].to(device)
         color = data['color'].to(device)
@@ -352,15 +352,22 @@ def val(dataset_test, dataset_train, model, metric, device, logger):
         all_drct.append(drct_error)
         all_trans.append(trans_error)
         all_rotation.append(rotation_error)
-        all_idx.append(data['idx'])
+        idx = data['idx'] % 1000
+        shape_id = data['idx'] / 1000
+        all_idx.append(idx)
+        all_shape_id.append(shape_id)
         all_time.append(t_inference)
         viz_f['idx'] = data['idx']
         all_viz.append(viz_f)
         #print(viz_f['input_seg'].shape, viz_f['input_seg'][0])
+        all_iou_sum.append(torch.tensor([[viz_f['iou_sum']]]))
         seg_scores = viz_f['input_seg'][0]
         confidence = 0
+        seg_1_num = 0
         for i in range(seg_scores.size(-1)):
-            confidence += (seg_scores[0][i] if (seg_scores[0][i] > seg_scores[1][i]) else seg_scores[1][i])
+            if (seg_scores[1][i] > seg_scores[0][i]):
+                confidence += seg_scores[1][i]
+                seg_1_num += 1
         confidence /= seg_scores.size(-1)
         all_confidence.append(torch.tensor([[confidence]]))
     mem_used_max_GB = torch.cuda.max_memory_allocated() / (1024*1024*1024)
@@ -369,10 +376,14 @@ def val(dataset_test, dataset_train, model, metric, device, logger):
     all_drct = torch.cat(all_drct, dim=0).detach().cpu()
     all_trans = torch.cat(all_trans, dim=0).detach().cpu()
     all_rotation = torch.cat(all_rotation, dim=0).detach().cpu()
+    all_shape_id = torch.cat(all_shape_id, dim=0).detach().cpu()
     all_idx = torch.cat(all_idx, dim=0).detach().cpu()
+    all_iou_sum = torch.cat(all_iou_sum, dim=0).detach().cpu()
     all_confidence = torch.cat(all_confidence, dim=0).detach().cpu()
     if all_idx.dim()==1:
         all_idx = all_idx.reshape(-1,1)
+    if all_shape_id.dim()==1:
+        all_shape_id = all_shape_id.reshape(-1,1)
     all_time = torch.tensor(all_time)
     mean_seg, mean_joint, mean_drct, mean_trans, mean_rotation, mean_time = all_seg.mean(0), all_joint.mean(0), all_drct.mean(0), all_trans.mean(0), all_rotation.mean(0), all_time.mean()
     # 1 Joint, 2 Part
@@ -432,6 +443,5 @@ def val(dataset_test, dataset_train, model, metric, device, logger):
 
     acc_score = part_10d10c + joint_10d10c + seg_50
 
-    #print(all_idx, all_confidence)
-    csv = torch.cat([all_idx, all_time.unsqueeze(-1), all_seg, all_joint, all_drct, all_rotation, all_trans, all_confidence], dim=-1)
+    csv = torch.cat([all_shape_id, all_idx, all_time.unsqueeze(-1), all_seg, all_joint, all_drct, all_rotation, all_trans, all_iou_sum, all_confidence], dim=-1)
     return csv, all_viz, acc_score

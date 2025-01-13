@@ -29,4 +29,4 @@ def scatter(csv_file_path, shape_id):
 
 
 if __name__  == "__main__":
-    scatter("log/safe-101564_test/model_20250112_183516/csv/safe-101564_eval.csv", "101564")
+    scatter("log/safe-101584_test/model_20250113_152238/csv/safe-101584_eval.csv", "101584")

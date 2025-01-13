@@ -78,5 +78,5 @@ if __name__ == "__main__":
     #for file_path in file_paths:
     #    viz_pt(file_path)
     
-    viz_pt("dataset/pc/partial/safe-object/101363/101363_15p_joint_0.pt")
+    viz_pt("dataset/pc/partial/safe-hsaur/101363/test-50/101363_50p_joint_0.pt")
     #eval_result("log/safe-50_test/model_20241231_123155/csv/safe-50_eval.csv")

@@ -9,10 +9,10 @@ import re
 """
 sapienでlabelを取ってくるが、label==2のlink がbaseにくっついている
 """
+PARTIAL_ROOT_PATH = "/home/akrobo/research/op_align/real/pc/partial"
 
-
-def create_syn_data(points, labels, data_info: str, direction, pivot, per_object=False):
-    data = torch.load("/home/akrobo/research/op_align/dataset/pc/partial/safe/0.pt")#必要ないデータを埋めるため
+def create_syn_data(points, labels, data_info: str, direction, pivot, per_object=False, hsaur_itr_num=-1):
+    data = torch.load(os.path.join(PARTIAL_ROOT_PATH,"safe/0.pt"))#必要ないデータを埋めるため
     shape_id = int(data_info.split("_")[0])
     open_percentage = int(re.findall(r'\d+',  data_info.split("_")[1])[0])
     file_idx = int(f"{shape_id}{open_percentage:03}")#下三桁がpercentageで、その前がshape_id
@@ -71,19 +71,27 @@ def create_syn_data(points, labels, data_info: str, direction, pivot, per_object
     data['part_axis'] = torch.from_numpy(np.array([pivot.astype(np.float32)]))
     data['part_pv_point'] = torch.from_numpy(np.array([direction.astype(np.float32)]))
     print([torch.from_numpy(pivot.astype(np.float32))])
-    if per_object == False:
-        if not os.path.exists(os.path.join("/home/akrobo/research/op_align/real/pc/partial/safe", "test-" + str(open_percentage))):
-            os.mkdir(os.path.join("/home/akrobo/research/op_align/real/pc/partial/safe", "test-" + str(open_percentage)))
-        torch.save(data, os.path.join("/home/akrobo/research/op_align/real/pc/partial/safe", "test-" + str(open_percentage) , data_info + ".pt"))
-        print("Save testdata: ", data_info + ".pt  to  safe/test-"+str(open_percentage))
+    if hsaur_itr_num != -1:
+        if not os.path.exists(os.path.join(PARTIAL_ROOT_PATH, "safe-hsaur", str(shape_id))):
+            os.mkdir(os.path.join(PARTIAL_ROOT_PATH, "safe-hsaur", str(shape_id)))
+        if not os.path.exists(os.path.join(PARTIAL_ROOT_PATH, "safe-hsaur", str(shape_id), "test-" + str(open_percentage))):
+            os.mkdir(os.path.join(PARTIAL_ROOT_PATH, "safe-hsaur", str(shape_id), "test-" + str(open_percentage)))
+        torch.save(data, os.path.join(PARTIAL_ROOT_PATH, "safe-hsaur", str(shape_id), "test-" + str(open_percentage), str(hsaur_itr_num) + ".pt"))
+        print("Save testdata: ", str(hsaur_itr_num) + ".pt  to  safe-hsaur/", str(shape_id), "/test-", str(open_percentage))
     else:
-        if not os.path.exists(os.path.join("/home/akrobo/research/op_align/real/pc/partial/safe-object", str(shape_id))):
-            os.mkdir(os.path.join("/home/akrobo/research/op_align/real/pc/partial/safe-object", str(shape_id)))
-        torch.save(data, os.path.join("/home/akrobo/research/op_align/real/pc/partial/safe-object", str(shape_id), data_info + ".pt"))
-        print("Save testdata: ", data_info + ".pt  to  safe-object/"+str(shape_id))
+        if per_object == False:
+            if not os.path.exists(os.path.join(PARTIAL_ROOT_PATH, "safe", "test-" + str(open_percentage))):
+                os.mkdir(os.path.join(PARTIAL_ROOT_PATH, "safe", "test-" + str(open_percentage)))
+            torch.save(data, os.path.join(PARTIAL_ROOT_PATH, "safe", "test-" + str(open_percentage) , data_info + ".pt"))
+            print("Save testdata: ", data_info + ".pt  to  safe/test-"+str(open_percentage))
+        else:
+            if not os.path.exists(os.path.join(PARTIAL_ROOT_PATH, "safe-object", str(shape_id))):
+                os.mkdir(os.path.join(PARTIAL_ROOT_PATH, "safe-object", str(shape_id)))
+            torch.save(data, os.path.join(PARTIAL_ROOT_PATH, "safe-object", str(shape_id), data_info + ".pt"))
+            print("Save testdata: ", data_info + ".pt  to  safe-object/"+str(shape_id))
     
 def check():
-    data = torch.load("/home/akrobo/research/op_align/dataset/pc/partial/safe/test/0.pt")#必要ないデータを埋めるため
+    data = torch.load(PARTIAL_ROOT_PATH+"/safe/test/0.pt")#必要ないデータを埋めるため
     created_data = torch.load("dataset/pc/partial/safe/test1/101363_10p_joint_0.pt")
     
     print("data",data['pc'].dtype, data['label'].dtype)

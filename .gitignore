@@ -145,7 +145,6 @@ model_weight
 model_weight.zip
 
 #viz
-viz.py
 viz_rec.py
 viz_pt.py
 viz_comparison.py

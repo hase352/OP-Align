@@ -82,21 +82,24 @@ def create_syn_data(points, labels, data_info: str, direction, pivot, per_object
     #print([torch.from_numpy(pivot.astype(np.float32))])
     if hsaur_itr_num == -1:
         if per_object:
-            if not os.path.exists(os.path.join(PARTIAL_ROOT_PATH, "safe-object", str(shape_id))):
-                os.mkdir(os.path.join(PARTIAL_ROOT_PATH, "safe-object", str(shape_id)))
-            torch.save(data, os.path.join(PARTIAL_ROOT_PATH, "safe-object", str(shape_id), data_info + ".pt"))
+            root_path = os.path.join(PARTIAL_ROOT_PATH, "safe-object", str(shape_id))
+            if not os.path.exists(root_path):
+                os.mkdir(root_path)
+            torch.save(data, os.path.join(root_path, data_info + ".pt"))
             print("Save testdata: ", data_info + ".pt  to  safe-object/"+str(shape_id))
         else:
-            if not os.path.exists(os.path.join(PARTIAL_ROOT_PATH, "safe-perct", "test-" + str(open_percentage))):
-                os.mkdir(os.path.join(PARTIAL_ROOT_PATH, "safe-perct", "test-" + str(open_percentage)))
-            torch.save(data, os.path.join(PARTIAL_ROOT_PATH, "safe-perct", "test-" + str(open_percentage) , data_info + ".pt"))
+            root_path = os.path.join(PARTIAL_ROOT_PATH, "safe-perct", "test-" + str(open_percentage))
+            if not os.path.exists(root_path):
+                os.mkdir(root_path)
+            torch.save(data, os.path.join(root_path , data_info + ".pt"))
             print("Save testdata: ", data_info + ".pt  to  safe-perct/test-"+str(open_percentage))
     else:
-        if not os.path.exists(os.path.join(PARTIAL_ROOT_PATH, "safe-hsaur-opalign", str(shape_id))):
-            os.mkdir(os.path.join(PARTIAL_ROOT_PATH, "safe-hsaur-opalign", str(shape_id)))
-        if not os.path.exists(os.path.join(PARTIAL_ROOT_PATH, "safe-hsaur-opalign", str(shape_id), "test-" + str(open_percentage))):
-            os.mkdir(os.path.join(PARTIAL_ROOT_PATH, "safe-hsaur-opalign", str(shape_id), "test-" + str(open_percentage)))
-        torch.save(data, os.path.join(PARTIAL_ROOT_PATH, "safe-hsaur-opalign", str(shape_id), "test-" + str(open_percentage), str(hsaur_itr_num) + ".pt"))
+        root_path = os.path.join(PARTIAL_ROOT_PATH, "safe-hsaur-opalign", str(shape_id))
+        if not os.path.exists(root_path):
+            os.mkdir(root_path)
+        if not os.path.exists(os.path.join(root_path, "test-" + str(open_percentage))):
+            os.mkdir(os.path.join(root_path, "test-" + str(open_percentage)))
+        torch.save(data, os.path.join(root_path, "test-" + str(open_percentage), str(hsaur_itr_num) + ".pt"))
         print("Save testdata: ", str(hsaur_itr_num) + ".pt  to  safe-hsaur-opalign/", str(shape_id), "/test-", str(open_percentage))
         
             

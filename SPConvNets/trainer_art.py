@@ -367,7 +367,10 @@ def val(dataset_test, dataset_train, model, metric, device, logger):
         for i in range(seg_scores.size(-1)):
             if (seg_scores[1][i] > seg_scores[0][i]):
                 confidence += seg_scores[1][i]
-                seg_1_num += 1
+                #seg_1_num += 1
+            else:
+                confidence += seg_scores[0][i]
+        #confidence /= seg_1_num
         confidence /= seg_scores.size(-1)
         all_confidence.append(torch.tensor([[confidence]]))
     mem_used_max_GB = torch.cuda.max_memory_allocated() / (1024*1024*1024)

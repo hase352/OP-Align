@@ -25,7 +25,7 @@ class LightDataset(data.Dataset):
             self.shape_root = os.path.join(self.root, 'partial', shape_type)
         else:
             self.shape_root = os.path.join(self.root, 'full', shape_type)
-        self.instance_list = glob(os.path.join(self.root, "partial/safe-object/101584", '*.pt'))
+        self.instance_list = glob(os.path.join(self.root, "partial/safe/test-30", '*.pt'))
         print(self.shape_root, split)
 
         if len(self.instance_list) == 0:

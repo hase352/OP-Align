@@ -2,10 +2,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def scatter(csv_file_path, shape_id):
+def scatter_confidence(csv_file_path, shape_id):
     data = pd.read_csv(csv_file_path)
-    iou = data["iou_sum"].values
-    confidence = data["confidence"].values
+    shape_id_data = data[data['shape_id'] == shape_id]
+    iou = shape_id_data["iou_sum"].values
+    confidence = shape_id_data["confidence"].values
     # 相関係数の計算
     correlation_coefficient = np.corrcoef(iou, confidence)[0, 1]
 
@@ -29,4 +30,4 @@ def scatter(csv_file_path, shape_id):
 
 
 if __name__  == "__main__":
-    scatter("log/safe-101584_test/model_20250113_152238/csv/safe-101584_eval.csv", "101584")
+    scatter_confidence("log/safe-hsaur-101603-30_test/model_20250123_130609/csv/safe-hsaur-101603-30_eval.csv", "101603")

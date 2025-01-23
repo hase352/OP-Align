@@ -365,7 +365,7 @@ class Art_Metric(torch.nn.Module):
         return gt_pose
     
     def standardization_ransac(self):
-        T, s, r_th, t_th = 100, 5, 10, 0.25
+        T, s, r_th, t_th = 100, 4, 10, 0.25
         self.standardization_list = torch.cat(self.standardization_list, dim=0)#B,P,4,4
         B, P = self.standardization_list.shape[0], self.standardization_list.shape[1]
         self.mean_rotation = torch.zeros_like(self.standardization_list[0,:,:3,:3])

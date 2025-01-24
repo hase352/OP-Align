@@ -11,7 +11,7 @@ sapienでlabelを取ってくるが、label==2のlink がbaseにくっついて�
 """
 PARTIAL_ROOT_PATH = "/home/akrobo/research/op_align/real/pc/partial"
 
-def create_syn_data(points, labels, data_info: str, direction, pivot, per_object=False, hsaur_itr_num=-1):#hsaur_it_num!=-1 のならh-saurの結果
+def create_syn_data(points, labels, data_info: str, direction, pivot, per_object=False, hsaur_itr_num=-1):#hsaur_it_num!=-1 のならhsaur-opalignの結果
     data = torch.load(os.path.join(PARTIAL_ROOT_PATH,"safe/0.pt"))#必要ないデータを埋めるため
     shape_id = int(data_info.split("_")[0])
     open_percentage = int(re.findall(r'\d+',  data_info.split("_")[1])[0])
@@ -80,19 +80,29 @@ def create_syn_data(points, labels, data_info: str, direction, pivot, per_object
     data['part_axis'] = torch.from_numpy(np.array([pivot.astype(np.float32)]))
     data['part_pv_point'] = torch.from_numpy(np.array([direction.astype(np.float32)]))
     #print([torch.from_numpy(pivot.astype(np.float32))])
+    
     if hsaur_itr_num == -1:
-        if per_object:
-            root_path = os.path.join(PARTIAL_ROOT_PATH, "safe-object", str(shape_id))
+        if per_object and str(shape_id) in ["101604", "101605", "101611", "101612", "101613", "101619", "101623", "102316", "102318"]:#train data
+            root_path = os.path.join(PARTIAL_ROOT_PATH, "safe-obj-train", str(shape_id))
             if not os.path.exists(root_path):
                 os.mkdir(root_path)
             torch.save(data, os.path.join(root_path, data_info + ".pt"))
-            print("Save testdata: ", data_info + ".pt  to  safe-object/"+str(shape_id))
+            print("Save testdata: ", data_info + ".pt  to  safe-obj-train/"+str(shape_id))
+            
+        elif per_object and str(shape_id) not in ["101604", "101605", "101611", "101612", "101613", "101619", "101623", "102316", "102318"]:
+            root_path = os.path.join(PARTIAL_ROOT_PATH, "safe-obj-test", str(shape_id))
+            if not os.path.exists(root_path):
+                os.mkdir(root_path)
+            torch.save(data, os.path.join(root_path, data_info + ".pt"))
+            print("Save testdata: ", data_info + ".pt  to  safe-obj-test/"+str(shape_id))
+            
         else:
             root_path = os.path.join(PARTIAL_ROOT_PATH, "safe-perct", "test-" + str(open_percentage))
             if not os.path.exists(root_path):
                 os.mkdir(root_path)
             torch.save(data, os.path.join(root_path , data_info + ".pt"))
             print("Save testdata: ", data_info + ".pt  to  safe-perct/test-"+str(open_percentage))
+            
     else:
         root_path = os.path.join(PARTIAL_ROOT_PATH, "safe-hsaur-opalign", str(shape_id))
         if not os.path.exists(root_path):

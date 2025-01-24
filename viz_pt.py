@@ -62,21 +62,9 @@ def viz_pt(file_path):
     # 点群を可視化
     o3d.visualization.draw_geometries([point_cloud, j], window_name=file_path)
 
-
-def viz_syn_result():
-    viz = np.load('log/safe_test/model_20241223_143106/viz/00000.npz', allow_pickle=True)['arr_0'].item()
-    print(viz.keys())
     
-    
-def eval_result(csv_path):
-    eval_csv = pd.read_csv(csv_path)
-    print(np.mean(eval_csv['seg_1']))
 
 if __name__ == "__main__":
-    
-    file_paths = glob.glob("/home/akrobo/research/op_align/dataset/pc/partial/safe-object/101584/*.pt")
-    #for file_path in file_paths:
-    #    viz_pt(file_path)
-    
-    viz_pt("dataset/pc/partial/safe/test-30/102423_30p_joint_0.pt")
-    #eval_result("log/safe-50_test/model_20241231_123155/csv/safe-50_eval.csv")
+    file_paths = glob.glob("dataset/pc/partial/safe-perct/test-30/*.pt")
+    for file_path in file_paths:
+        viz_pt(file_path)

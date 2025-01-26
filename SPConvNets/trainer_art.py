@@ -362,17 +362,24 @@ def val(dataset_test, dataset_train, model, metric, device, logger):
         #print(viz_f['input_seg'].shape, viz_f['input_seg'][0])
         all_iou_sum.append(torch.tensor([[viz_f['iou_sum']]]))
         seg_scores = viz_f['input_seg'][0]
-        confidence = 0
-        seg_1_num = 0
+        confidence_all = 0
+        confidence_seg_0 = 0
+        confidence_seg_1 = 0
+        n_seg_0 = 0
+        n_seg_1 = 0
         for i in range(seg_scores.size(-1)):
             if (seg_scores[1][i] > seg_scores[0][i]):
-                confidence += seg_scores[1][i]
-                #seg_1_num += 1
+                confidence_all += seg_scores[1][i]
+                confidence_seg_1 += seg_scores[1][i]
+                n_seg_1 += 1
             else:
-                confidence += seg_scores[0][i]
-        #confidence /= seg_1_num
-        confidence /= seg_scores.size(-1)
-        all_confidence.append(torch.tensor([[confidence]]))
+                confidence_all += seg_scores[0][i]
+                confidence_seg_0 += seg_scores[0][i]
+                n_seg_0 += 1
+        confidence_all /= seg_scores.size(-1)
+        confidence_seg_0 /= n_seg_0
+        confidence_seg_1 /= n_seg_1
+        all_confidence.append(torch.tensor([[confidence_all, confidence_seg_0, confidence_seg_1]]))
     mem_used_max_GB = torch.cuda.max_memory_allocated() / (1024*1024*1024)
     all_seg = torch.cat(all_seg, dim=0).detach().cpu()
     all_joint = torch.cat(all_joint, dim=0).detach().cpu()

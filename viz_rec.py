@@ -71,18 +71,19 @@ def drct_rotation(drct):
 
 def main(path:str):
     f = np.load(path, allow_pickle=True)['arr_0'].item()   
-    print(f.keys(), f['idx'])
+    #print(f.keys(), f['idx'])
 
     input = f['input'][0].transpose(1,0)
     inputa = o3d.geometry.PointCloud()
     inputa.points = o3d.utility.Vector3dVector(input)
     
-    print(max(input[:,0]), min(input[:,0]),max(input[:,1]), min(input[:,1]), max(input[:,2]), min(input[:,2]))
+    #print(max(input[:,0]), min(input[:,0]),max(input[:,1]), min(input[:,1]), max(input[:,2]), min(input[:,2]))
+    
     
     
     input_r = sciR.random().as_matrix()
     input_align = f['input_align'][0].transpose(1,0)
-    print(max(input_align[:,0]), min(input_align[:,0]))
+    print(max(input_align[:,2]) - min(input_align[:,2]))
     input_seg = f['input_seg'][0]
     input_color = torch.zeros_like(input_align) * 0.5
     input_color[:,0], input_color[:,1], input_color[:,2] = input_seg[0,:], input_seg[1,:], 0 if input_seg.shape[0]== 2 else input_seg[2,:]
@@ -161,8 +162,8 @@ if __name__ == "__main__":
     index = -1 
     if dataset in instance_name_list:
         index = instance_name_list.index(dataset)
-    print("index:",index)
-    file_paths = glob("log/safe-30_test/model_20250123_142945/viz/*")
+    #print("index:",index)
+    file_paths = glob("log/safe_test/viz/*")
     for file_path in file_paths:
-        print(file_path)
+        #print(file_path)
         main(file_path)

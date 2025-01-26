@@ -255,8 +255,8 @@ class Trainer():
         save_filename = '%s_eval.csv' % (label)
         save_path = os.path.join(self.root_dir, 'csv', save_filename)
         csv = csv.numpy()
-        if csv.shape[-1] == 13:
-            header = "shape_id, idx, time, seg_0, seg_1, joint_0, direction_0, rotation_0, rotation_1, translation_0, translation_1, iou_sum, confidence"
+        if csv.shape[-1] == 15:
+            header = "shape_id, idx, time, seg_0, seg_1, joint_0, direction_0, rotation_0, rotation_1, translation_0, translation_1, iou_sum, confidence_all, confidence_seg_0, confidence_seg_1"
         else:
             header = "idx, time, seg_0, seg_1, seg_2, joint_0, joint_1, direction_0, direction_1, rotation_0, rotation_1, rotation_2, translation_0, translation_1, translation_2"
         header = header.replace(' ', '').split(',')

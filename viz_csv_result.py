@@ -54,6 +54,8 @@ def eval_test_result(csv_file_path, test_shape_ids):
     data['shape_id'] = data['shape_id'].astype(int)
     data['idx'] = data['idx'].astype(int)
     test_shape_ids = list(map(int, test_shape_ids))
+    file_name = csv_file_path.split('/')[-1]
+    percentage = ''.join(re.findall(r'\d+', file_name))
     
     shape_id_filtered_data = data[data['shape_id'] == test_shape_ids[0]]
     max_confidence_row = shape_id_filtered_data.loc[shape_id_filtered_data['confidence_seg_1'].idxmax()]
@@ -66,9 +68,9 @@ def eval_test_result(csv_file_path, test_shape_ids):
         
     opalign_result = opalign_result.astype({'shape_id': 'int', 'idx': 'str'})
     ours_result = ours_result.astype({'shape_id': 'int', 'idx': 'int'})
-    print("op-align result")
+    #print("op-align result")
     op_table = print_eval(opalign_result)
-    print("\nours result")
+    #print("\nours result")
     ours_table = print_eval(ours_result)
     
     latex_op, latex_ours = "", ""
@@ -94,8 +96,12 @@ def eval_test_result(csv_file_path, test_shape_ids):
             latex_op += r"& \textbf{" +f"{round(op_table[i], ndigits):.{ndigits}f}" + "}  "
             latex_ours += r"& \textbf{" +f"{round(ours_table[i], ndigits):.{ndigits}f}" + "}  "
        
-    
-    latex = "& OP-Align  " + latex_op + r"\\    & Ours  " + latex_ours + r"\\  \hline"
+    if int(percentage) == 100:
+        latex = "\multirow{2}{*}{" + str(percentage) + "}  & OP-Align  " + latex_op + r"""\\    
+                     & Ours  """ + latex_ours + r"\\  \bottomrule"
+    else:
+        latex = "\multirow{2}{*}{" + str(percentage) + "}  & OP-Align  " + latex_op + r"""\\    
+                     & Ours  """ + latex_ours + r"\\  \hline"
 
     
     for shape_id in test_shape_ids:
@@ -104,9 +110,9 @@ def eval_test_result(csv_file_path, test_shape_ids):
             opalign_result = opalign_result[opalign_result["shape_id"] != shape_id]
             ours_result = ours_result[ours_result['shape_id'] != shape_id]
     
-    print("\n\nop-align result after remove manipulation miss data")
+    #print("\n\nop-align result after remove manipulation miss data")
     op_table = print_eval(opalign_result)
-    print("\nours result after remove manipulation miss data")
+    #print("\nours result after remove manipulation miss data")
     ours_table = print_eval(ours_result)
     
     latex_op, latex_ours = "", ""
@@ -133,12 +139,16 @@ def eval_test_result(csv_file_path, test_shape_ids):
             latex_ours += r"& \textbf{" +f"{round(ours_table[i], ndigits):.{ndigits}f}" + "}  "
        
     
-    latex_rm = "& OP-Align  " + latex_op + r"\\    & Ours  " + latex_ours + r"\\  \hline"
+    if int(percentage) == 100:
+        latex_rm = "\multirow{2}{*}{" + str(percentage) + "}  & OP-Align  " + latex_op + r"""\\    
+                     & Ours  """ + latex_ours + r"\\  \bottomrule"
+    else:
+        latex_rm = "\multirow{2}{*}{" + str(percentage) + "}  & OP-Align  " + latex_op + r"""\\    
+                     & Ours  """ + latex_ours + r"\\  \hline"
     
-    file_name = csv_file_path.split('/')[-1]
-    percentage = ''.join(re.findall(r'\d+', file_name))
     
-    return "\multirow{2}{*}{" + str(percentage) + "}  " + latex, "\multirow{2}{*}{" + str(percentage) + "}  " + latex_rm
+    
+    return latex, latex_rm
     
 def print_eval(data):
     mean_seg = [data['seg_0'].mean() *100, data['seg_1'].mean() * 100, data['iou_sum'].mean() * 100]
@@ -162,7 +172,7 @@ def print_eval(data):
                                torch.tensor(data['seg_1'].values) > 0.75)
     seg_50 = seg_50.sum() / data['idx'].shape[0]
     seg_75 = seg_75.sum() / data['idx'].shape[0]
-    
+    """
     print('Testing', 'Average Segmentation IoU: ' + str(mean_seg))
     print('Testing', 'Average Joint Position Error: ' + str(mean_joint))
     print('Testing', 'Average Joint Direction Error: ' + str(mean_drct))
@@ -173,7 +183,7 @@ def print_eval(data):
     print('Testing', 'Joint 15degree: ' + str(100 * joint_15d))
     print('Testing', 'Segmentation 50: ' + str(100 * seg_50))
     print('Testing', 'Segmentation 75: ' + str(100 * seg_75))
-    
+    """
     return [mean_seg[2], mean_joint, mean_drct]
     #return f"& {str(round(mean_seg[2], 2))}  & {str(round((mean_joint), 3))}  & {str(round(mean_drct, 2))}  \\      "
 
@@ -189,8 +199,43 @@ if __name__  == "__main__":
     csv_path_30 = "log/safe-hsaur-opalign-30_test/model_20250125_010343/csv/safe-hsaur-opalign-30_eval.csv"#
     csv_path_40 = "log/safe-hsaur-opalign-40_test/model_20250125_014626/csv/safe-hsaur-opalign-40_eval.csv"
     csv_path_50 = "log/safe-hsaur-opalign-50_test/model_20250125_010514/csv/safe-hsaur-opalign-50_eval.csv"
-    one_row, one_row_rm = eval_test_result(csv_path_0, test_shape_ids)
+    csv_path_80 = "log/safe-hsaur-opalign-80_test/model_20250126_122256/csv/safe-hsaur-opalign-80_eval.csv"
+    csv_path_100 = "log/safe-hsaur-opalign-100_test/model_20250126_122316/csv/safe-hsaur-opalign-100_eval.csv"
+    csv_path_all = [csv_path_0, csv_path_10, csv_path_20, csv_path_30, csv_path_40, csv_path_50, csv_path_80, csv_path_100]
     
-    print(one_row)
-    print(one_row_rm)
+    all_row = R"""
+\begin{table}[ht]
+\centering
+\begin{tabular}{ccccc}
+\toprule
+\multirow{2}{*}{Joint Angle(\%)} & \multirow{2}{*}{Method} & \multirow{2}{*}{Segmentation IoU↑} & \multicolumn{2}{c}{Joint} \\ 
+                     &          &                 & Position↓      & Direction(degree)↓   \\ \midrule"""
+    all_row_rm = R"""
+\begin{table}[ht]
+\centering
+\begin{tabular}{ccccc}
+\toprule
+\multirow{2}{*}{Joint Angle(\%)} & \multirow{2}{*}{Method} & \multirow{2}{*}{Segmentation IoU↑} & \multicolumn{2}{c}{Joint} \\ 
+                     &          &                 & Position↓      & Direction(degree)↓   \\ \midrule"""
+    
+    for csv_path in csv_path_all:
+        one_row, one_row_rm = eval_test_result(csv_path, test_shape_ids)
+        all_row += f"""
+{one_row}"""
+        all_row_rm += f"""
+{one_row_rm}"""
+
+    all_row += R"""
+\end{tabular}
+\caption{提案手法と既存手法の結果}
+\label{tab:result-score}
+\end{table}"""
+    all_row_rm += R"""
+\end{tabular}
+\caption{提案手法と既存手法の結果(ただし、ロボットマニピュレーションによって物体に変化が起きなかった時を除く)}
+\label{tab:result-score-without-miss}
+\end{table}"""
+    
+    print(all_row)
+    print(all_row_rm)
     #scatter_confidence(csv_path_30, test_shape_ids, "confidence_seg_1")

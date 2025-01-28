@@ -65,6 +65,6 @@ def viz_pt(file_path):
     
 
 if __name__ == "__main__":
-    file_paths = glob.glob("dataset/pc/partial/safe-perct/test-30/*.pt")
+    file_paths = glob.glob("dataset/pc/partial/safe-perct/4/test-10/101363_10p_joint_0.pt")
     for file_path in file_paths:
         viz_pt(file_path)

@@ -163,7 +163,7 @@ if __name__ == "__main__":
     if dataset in instance_name_list:
         index = instance_name_list.index(dataset)
     #print("index:",index)
-    file_paths = glob("log/safe_test/viz/*")
+    file_paths = glob("log/safe-3_test/model_20250127_105654/viz/*")
     for file_path in file_paths:
         #print(file_path)
         main(file_path)

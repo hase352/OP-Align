@@ -1,4 +1,4 @@
-name: OP
+name: OH
 channels:
   - pytorch
   - conda-forge
@@ -72,7 +72,10 @@ dependencies:
   - xz=5.4.2=h5eee18b_0
   - zlib=1.2.13=h5eee18b_0
   - zstd=1.5.5=hc292b87_0
+  # H
+  - omegaconf==2.3.0
   - pip:
+    # op align
       - absl-py==2.0.0
       - anyio==3.7.1
       - argon2-cffi==23.1.0
@@ -190,4 +193,14 @@ dependencies:
       - widgetsnbextension==4.0.9
       - yacs==0.1.8
       - zipp==3.15.0
+
+      # hsaur
+      - sapien==1.1
+      - transforms3d
+      - beautifultable
+      - tensorboardX
+      - progressbar
+      - h5py
+      - lmdb
+      - distinctipy
 prefix: /home/che/anaconda3/envs/e2pn

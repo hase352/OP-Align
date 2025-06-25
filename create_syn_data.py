@@ -81,6 +81,10 @@ def create_syn_data(points, labels, data_info: str, direction, pivot, per_object
     data['part_pv_point'] = torch.from_numpy(np.array([direction.astype(np.float32)]))
     #print([torch.from_numpy(pivot.astype(np.float32))])
     
+    # 全ての点群を追加してみる
+    data['full_pc'] = torch.from_numpy(points.astype(np.float32))
+    data['full_label'] = torch.from_numpy(labels.astype(np.int64))
+    
     if hsaur_itr_num == -1:
         if per_object and str(shape_id) in ["101564", "101593", "101599",  "101604", "101605", "101611", 
                                             "101612", "101613", "101619", "101623", "102301", "102316", 
@@ -106,7 +110,7 @@ def create_syn_data(points, labels, data_info: str, direction, pivot, per_object
             print("Save testdata: ", data_info + ".pt  to  " + dir_path)
             
     else:
-        dir_path = os.path.join(PARTIAL_ROOT_PATH, "safe-ours", "4", str(shape_id), "test-" + str(open_percentage))
+        dir_path = os.path.join(PARTIAL_ROOT_PATH, "safe-ours", "1", str(shape_id), "test-" + str(open_percentage))
         os.makedirs(dir_path, exist_ok=True)
         torch.save(data, os.path.join(dir_path, str(hsaur_itr_num) + ".pt"))
         print("Save testdata: ", str(hsaur_itr_num) + ".pt  to  " + dir_path)

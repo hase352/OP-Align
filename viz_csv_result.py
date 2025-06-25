@@ -3,13 +3,15 @@ import torch
 import pandas as pd
 import matplotlib.pyplot as plt
 import re
+import japanize_matplotlib
+import statistics
 
 def scatter_confidence(csv_file_path, shape_ids, confidence_name):
     data = pd.read_csv(csv_file_path)
     data['shape_id'] = data['shape_id'].astype(int)
     data['idx'] = data['idx'].astype(int)
     avg_correlation_coefficient, n_len_1 = 0, 0
-    outputs_opalign, outputs_pm= [], []
+    list_correlation_coefficient, outputs_opalign, outputs_pm= [], [], []
     for shape_id in shape_ids:
         shape_id_filtered_data = data[data['shape_id'] == int(shape_id)]
         iou = shape_id_filtered_data["iou_sum"].values
@@ -22,6 +24,7 @@ def scatter_confidence(csv_file_path, shape_ids, confidence_name):
         else:
             correlation_coefficient = np.corrcoef(iou, confidence)[0, 1]
             avg_correlation_coefficient += correlation_coefficient
+            list_correlation_coefficient.append(correlation_coefficient)
         
             outputs_opalign.append(iou[0])
             confidence_list = confidence.tolist()
@@ -31,16 +34,16 @@ def scatter_confidence(csv_file_path, shape_ids, confidence_name):
 
         # 散布図の作成
         plt.figure(figsize=(8, 6))
-        plt.scatter(confidence, iou, color='blue', alpha=0.7, label="Data Points")
+        plt.scatter(confidence, iou, color='blue', alpha=0.7)
         #plt.scatter(confidence[max_index], iou[max_index], color='red', label="Ours Output")
-        plt.suptitle(f"Scatter Plot of Confidence vs IoU shape id: {shape_id}", fontsize=12, y=0.95)
-        plt.title(f"Correlation Coefficient: {correlation_coefficient:.2f}")
-        plt.ylabel("IoU")
-        plt.xlabel("Confidence")
+        #plt.suptitle(f"$w^1$ と IoU の散布図", fontsize=20, y=0.99)
+        plt.title(f"相関係数: {correlation_coefficient:.2f}", fontsize=80)
+        plt.xlabel(r"$w_{\mathrm{all}}$", fontsize=80)
+        plt.ylabel("mIoU", fontsize=80)
         plt.grid(True)
 
         # 凡例の追加
-        plt.legend()
+        #plt.legend()
 
         # プロットの表示
         plt.show()
@@ -48,6 +51,7 @@ def scatter_confidence(csv_file_path, shape_ids, confidence_name):
     avg_correlation_coefficient /= (len(shape_ids) - n_len_1)
     avg_outputs_opalign = sum(outputs_opalign) / len(outputs_opalign)
     avg_outputs_pm = sum(outputs_pm) / len(outputs_pm)
+    print(statistics.pvariance(list_correlation_coefficient))
     
     print(csv_file_path, "相関係数", avg_correlation_coefficient, "op-align iou", avg_outputs_opalign, "proposed method iou",avg_outputs_pm)
 
@@ -56,17 +60,17 @@ def create_table_1_latex(csv_paths_all, test_shape_ids):
     all_row = R"""
 \begin{table}[ht]
 \centering
-\begin{tabular}{cccccc}
+\begin{tabular}{ccccccc}
 \toprule
-\multirow{2}{*}{Joint Angle(\%)} & \multirow{2}{*}{Method} & \multicolumn{2}{c}{Segmentation IoU} & \multicolumn{2}{c}{Joint} \\ 
-                     & &  segment 0 $\uparrow$ & segment 1 $\uparrow$ & Position $\downarrow$ & Direction(degree) $\downarrow$   \\ \midrule"""
+\multirow{2}{*}{Joint Angle(\%)} & \multirow{2}{*}{Method} & \multicolumn{3}{c}{Segmentation IoU} & \multicolumn{2}{c}{Joint} \\ 
+                     &  &  segment 0 $\uparrow$ & segment 1 $\uparrow$ & mean $\uparrow$ & Position $\downarrow$ & Direction $\downarrow$   \\ \midrule"""
     all_row_rm = R"""
 \begin{table}[ht]
 \centering
-\begin{tabular}{cccccc}
+\begin{tabular}{ccccccc}
 \toprule
-\multirow{2}{*}{Joint Angle(\%)} & \multirow{2}{*}{Method} & \multicolumn{2}{c}{Segmentation IoU↑} & \multicolumn{2}{c}{Joint} \\ 
-                     &          &   segment 0 $\uparrow$ & segment 1 $\uparrow$ & Position $\downarrow$     & Direction(degree) $\downarrow$   \\ \midrule"""
+\multirow{2}{*}{Joint Angle(\%)} & \multirow{2}{*}{Method} & \multicolumn{3}{c}{Segmentation IoU↑} & \multicolumn{2}{c}{Joint} \\ 
+                     &   &   segment 0 $\uparrow$ & segment 1 $\uparrow$ & mean $\uparrow$ & Position $\downarrow$     & Direction $\downarrow$   \\ \midrule"""
     
     for csv_paths in csv_paths_all:
         one_row, one_row_rm= process_csv_and_create_latex_one_row(csv_paths, test_shape_ids)
@@ -195,12 +199,12 @@ def eval(data):
     print('Testing', 'Segmentation 50: ' + str(100 * seg_50))
     print('Testing', 'Segmentation 75: ' + str(100 * seg_75))
     """
-    return [mean_seg[0], mean_seg[1], mean_joint, mean_drct]
+    return [mean_seg[0], mean_seg[1], (mean_seg[0] + mean_seg[1])/2, mean_joint, mean_drct]
     #return f"& {str(round(mean_seg[2], 2))}  & {str(round((mean_joint), 3))}  & {str(round(mean_drct, 2))}  \\      "
     
 def create_latex_one_row(op_table, ours_table, percentage):
     latex_op, latex_ours = "", ""
-    for i in range(2):
+    for i in range(3):
         if op_table[i] > ours_table[i]:
             latex_op += r'& \textbf{' +f"{round(op_table[i], 2):.2f}" + "}  "
             latex_ours += f"& {round(ours_table[i], 2):.2f}  "
@@ -211,8 +215,8 @@ def create_latex_one_row(op_table, ours_table, percentage):
             latex_op += r"& \textbf{" +f"{round(op_table[i], 2):.2f}" + "}  "
             latex_ours += r"& \textbf{" +f"{round(ours_table[i], 2):.2f}" + "}  "
     
-    for i in range(2,4):
-        ndigits = 5 - i
+    for i in range(3,5):
+        ndigits = 6 - i
         if op_table[i] < ours_table[i]:
             latex_op += r'& \textbf{' +f"{round(op_table[i], ndigits):.{ndigits}f}" + "}  "
             latex_ours += f"& {round(ours_table[i], ndigits):.{ndigits}f}  "
@@ -231,7 +235,58 @@ def create_latex_one_row(op_table, ours_table, percentage):
                     & Ours  """ + latex_ours + r"\\  \hline"
     
     return latex
+
+
+
+
+def Line_plot(csv_path, shape_id):
+    data = pd.read_csv(csv_path)
+    data['shape_id'] = data['shape_id'].astype(int)
+    data['idx'] = data['idx'].astype(int)
+    shape_id_filtered_data = data[data['shape_id'] == int(shape_id)]
+    shape_id_filtered_data = shape_id_filtered_data.sort_values(by='idx')
     
+    df = shape_id_filtered_data.set_index('idx')  # 'itr'をインデックスにする
+    df = df.reindex(range(df.index.min(), df.index.max() + 1))  # 欠損しているitrを追加
+    df = df.ffill()  # 前の値で埋める
+
+    # インデックスをリセット（元の形に戻す）
+    shape_id_filtered_data = df.reset_index()
+    
+    itr = np.linspace(0, 10, 11)
+    iou  = (shape_id_filtered_data['seg_1'] + shape_id_filtered_data['seg_0']) / 2
+    confidence = shape_id_filtered_data['confidence_seg_1']
+
+    fig, ax1 = plt.subplots()
+
+    import matplotlib as mpl
+    mpl.rcParams['font.family'] = 'cmr10'  # Computer Modernフォント
+    mpl.rcParams['mathtext.fontset'] = 'cm'  # 数式もLaTeX風にする
+
+    # 1つ目の縦軸
+    ax1.plot(itr, iou, color='blue', linestyle='-', label='mIoU')
+    ax1.set_xlabel('Iteration', fontsize=20)
+    ax1.set_ylabel('mIoU', color='blue', fontsize=20)
+    ax1.tick_params(axis='y', labelcolor='blue')
+    ax1.grid(True)
+
+    # 2つ目の縦軸を作成
+    ax2 = ax1.twinx()
+    ax2.plot(itr, confidence, color='red', linestyle='--', label=rf'$w$')
+    ax2.set_ylabel(rf'$w$', color='red', fontsize=20)
+    ax2.tick_params(axis='y', labelcolor='red')
+
+    # 凡例の追加
+    #ax1.legend(loc='upper left', bbox_to_anchor=(0.1, 1.0))
+    #ax2.legend(loc='upper left', bbox_to_anchor=(0.9, 1.0))
+    lines1, labels1 = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper left', fontsize=13)
+
+    plt.show()
+
+    
+        
 
 
 if __name__  == "__main__":
@@ -264,7 +319,7 @@ if __name__  == "__main__":
     csv_path_2_50 = "log/safe-ours-2-50_test/model_20250128_102639/csv/safe-ours-2-50_eval.csv"
     csv_path_3_50 = "log/safe-ours-3-50_test/model_20250128_005358/csv/safe-ours-3-50_eval.csv"
     
-    csv_path_1_80 = "log/safe-hsaur-opalign-80_test/model_20250126_122256/csv/safe-hsaur-opalign-80_eval.csv"
+    csv_path_1_80 = "log/safe-hsaur-opalign-80_test/model_20250126_122256/csv/safe-hsaur-opalign-75_eval.csv"
     csv_path_2_80 = "log/safe-ours-2-80_test/model_20250128_102702/csv/safe-ours-2-80_eval.csv"
     csv_path_3_80 = "log/safe-ours-3-80_test/model_20250128_005427/csv/safe-ours-3-80_eval.csv"
     
@@ -277,4 +332,5 @@ if __name__  == "__main__":
                      [csv_path_1_80, csv_path_2_80, csv_path_3_80], [csv_path_1_100, csv_path_2_100, csv_path_3_100]]
     
     create_table_1_latex(csv_paths_all=csv_paths_all, test_shape_ids=test_shape_ids)
-    #scatter_confidence("log/safe-obj-train_test/model_20250126_181417/csv/safe-obj-train_eval.csv", train_shape_ids, "confidence_all")
+    scatter_confidence("log/safe-obj-train_test/model_20250126_181417/csv/safe-obj-train_eval.csv", [102318], "confidence_all")
+    #Line_plot("log/safe-ours-gomi-101594-10_test/model_20250130_183832/csv/safe-ours-gomi-101594-10_eval.csv", "101594")

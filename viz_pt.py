@@ -11,7 +11,7 @@ from viz import hat, ExpSO3, drct_rotation
 def viz_pt(file_path):
     data = torch.load(file_path)  # ファイル名は適宜変更
     
-    for key in ['idx', 'part_axis', 'part_pv_point']:
+    for key in data.keys():
         print(key, ": ",data[key].shape, data[key].dtype , data[key])
     #print(data['idx'])
     pc = data['pc']  # 'pc'キーの点群データを取得

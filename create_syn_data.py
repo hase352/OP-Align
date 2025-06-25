@@ -11,7 +11,7 @@ sapienでlabelを取ってくるが、label==2のlink がbaseにくっついて�
 """
 PARTIAL_ROOT_PATH = "/home/akrobo/research/op_align/real/pc/partial"
 
-def create_syn_data(points, labels, data_info: str, direction, pivot, per_object=False, hsaur_itr_num=-1):#hsaur_it_num!=-1 のならhsaur-opalignの結果
+def create_syn_data(points, rgba, labels, data_info: str, direction, pivot, per_object=False, hsaur_itr_num=-1):#hsaur_it_num!=-1 のならhsaur-opalignの結果
     data = torch.load(os.path.join(PARTIAL_ROOT_PATH,"safe/0.pt"))#必要ないデータを埋めるため
     shape_id = int(data_info.split("_")[0])
     open_percentage = int(re.findall(r'\d+',  data_info.split("_")[1])[0])
@@ -22,6 +22,9 @@ def create_syn_data(points, labels, data_info: str, direction, pivot, per_object
 
     point_cloud = o3d.geometry.PointCloud()
     point_cloud.points = o3d.utility.Vector3dVector(points)
+    
+    np.savez(f"{PARTIAL_ROOT_PATH}/points/{shape_id}_{open_percentage}{hsaur_itr_num}", points, rgba)
+    print("save", f"{PARTIAL_ROOT_PATH}/points/{shape_id}_{open_percentage}{hsaur_itr_num}")
 
     # 3. ダウンサンプリング
     voxel_size = 0.06  # ボクセルサイズ
@@ -106,7 +109,7 @@ def create_syn_data(points, labels, data_info: str, direction, pivot, per_object
             print("Save testdata: ", data_info + ".pt  to  " + dir_path)
             
     else:
-        dir_path = os.path.join(PARTIAL_ROOT_PATH, "safe-ours", "4", str(shape_id), "test-" + str(open_percentage))
+        dir_path = os.path.join(PARTIAL_ROOT_PATH, "safe-ours", "gomi", str(shape_id), "test-" + str(open_percentage))
         os.makedirs(dir_path, exist_ok=True)
         torch.save(data, os.path.join(dir_path, str(hsaur_itr_num) + ".pt"))
         print("Save testdata: ", str(hsaur_itr_num) + ".pt  to  " + dir_path)

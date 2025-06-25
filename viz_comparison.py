@@ -224,6 +224,95 @@ def viz_comparison_syn():
     o3d.visualization.draw_geometries([o3d_viz_pc, *viz_joints], window_name="viz_comparison")
     
     
+
+def get_segments_from_opalign():
+    npz = np.load("real/pc/partial/points/101612_0-1.npz")
+    points_all = npz['arr_0']
+    rgb = npz['arr_1']
+    viz_file_path = "log/safe-ours-gomi_test/model_20250206_180521/viz/102311002.npz"
+    ori_file_path = "real/pc/partial/safe-perct/3/test-0/101612_0p_joint_0.pt"
+    
+    if not os.path.exists(viz_file_path):
+        print(viz_file_path)
+        raise FileNotFoundError
+    if not os.path.exists(ori_file_path):
+        print(ori_file_path)
+        raise FileNotFoundError
+    
+    ori = torch.load(ori_file_path)
+    ori_pc = ori['pc'].numpy()
+    
+    viz = np.load(viz_file_path, allow_pickle=True)['arr_0'].item()
+    viz_pc = viz['input'][0].permute(1,0)
+    #print("max: ", max(viz_pc[:,0]), max(viz_pc[:,1]), max(viz_pc[:,2]))
+    viz_pc *= (max(ori_pc[0]) / max(viz_pc[0]))
+    #viz_pc += viz['gt_center']
+    #print("expand:", viz['gt_expand'], "center:", viz['gt_center'], "max_after_expand:",max(viz_pc[:,0]),max(viz_pc[:,1]),max(viz_pc[:,2]), "min_after_expand:",min(viz_pc[:,0]),min(viz_pc[:,1]),min(viz_pc[:,2]))
+    viz_joint = viz['input_joint'][0]
+    viz_joint /= viz['gt_expand']
+    #viz_joint += viz['gt_center'].reshape(1,3)
+    #print("viz_joint:", viz_joint)
+    viz_drct = viz['input_drct'][0]
+    viz_seg = viz['input_seg'][0]
+    print(viz_pc, viz_seg)
+    
+    
+    #正解を表示したいとき
+    viz_pc = ori['pc']
+    viz_joint = ori['part_pv_point']
+    viz_drct = ori['part_axis']
+    viz_seg = torch.Tensor([ori['label'].numpy(), 1-ori['label'].numpy()])
+    print(viz_pc, viz_seg)
+    
+    
+    ori_pc = points_all
+    ori_color = rgb[:,:3]/255
+    print(ori_color[1])
+    
+    o3d_ori_pc = o3d.geometry.PointCloud()
+    o3d_ori_pc.points = o3d.utility.Vector3dVector(ori_pc)
+    o3d_ori_pc.colors = o3d.utility.Vector3dVector(ori_color)
+    o3d.visualization.draw_geometries([o3d_ori_pc], window_name="ori_comparison")
+    
+    ori_part_d = []
+    for i in range(viz_seg.shape[0]):
+        part_pc = viz_pc[torch.max(viz_seg, dim=0).indices == i]
+        cur_d = knn_points(torch.tensor(ori_pc, dtype=torch.float32).reshape(1,-1,3), part_pc.reshape(1,-1,3)).dists
+        ori_part_d.append(cur_d[0,:,0])
+    ori_part_d = torch.stack(ori_part_d, dim=0)
+    ori_seg = (torch.min(ori_part_d, dim=0).indices).numpy()
+    
+    ori_color[:,0] = np.where(ori_seg==0, 0.3 + 0.7*ori_color[:,0], ori_color[:,0])
+    ori_color[:,1] = np.where(ori_seg==0, 0 + 0.5*ori_color[:,1], ori_color[:,1])
+    ori_color[:,2] = np.where(ori_seg==0, 0 + 0.5*ori_color[:,2], ori_color[:,2])
+
+    ori_color[:,0] = np.where(ori_seg==1, 0.5*ori_color[:,0], ori_color[:,0])
+    ori_color[:,1] = np.where(ori_seg==1, 0.3 + 0.7*ori_color[:,1], ori_color[:,1])
+    ori_color[:,2] = np.where(ori_seg==1, 0.5*ori_color[:,2], ori_color[:,2])
+
+    ori_color[:,0] = np.where(ori_seg==2, 0.5*ori_color[:,0], ori_color[:,0])
+    ori_color[:,1] = np.where(ori_seg==2, 0.5*ori_color[:,1], ori_color[:,1])
+    ori_color[:,2] = np.where(ori_seg==2, 0.3 + 0.7*ori_color[:,2], ori_color[:,2])
+    
+    viz_joints = []
+    for i in range(viz_joint.shape[0]):
+        joint_rotation = drct_rotation(viz_drct.unsqueeze(0)).squeeze(0)
+        #joint_rotation = drct_rotation(torch.tensor(ori_drct, dtype=torch.float).unsqueeze(0)).squeeze(0)
+        j = o3d.geometry.TriangleMesh.create_arrow(cylinder_radius=0.04, cone_radius=0.08, cylinder_height=1.4, cone_height=0.2)
+        j.rotate(np.array([[1,0,0],[0,1,0],[0,0,-1]]), center=False)
+        j.rotate(joint_rotation[i], center=False)
+        j.translate(viz_joint[i])
+        #j.translate(ori_joint[i])
+        #j.translate(0.5*ori_joint[i] + 0.5*viz_joint[i].numpy())
+        j.paint_uniform_color([0,0,0])
+        viz_joints.append(j)
+    
+    o3d_ori_pc = o3d.geometry.PointCloud()
+    o3d_ori_pc.points = o3d.utility.Vector3dVector(ori_pc)
+    o3d_ori_pc.colors = o3d.utility.Vector3dVector(ori_color)
+    o3d.visualization.draw_geometries([o3d_ori_pc, *viz_joints], window_name="ori_comparison")
+
+
     
 def check_expand(path):
     viz = np.load(path, allow_pickle=True)['arr_0'].item()
@@ -242,5 +331,6 @@ def check_expand(path):
 
 if __name__ == "__main__":
     #main('log/laptop_test/model_20241220_175736/viz/*.npz', 'dataset/laptop_output/test/gaming/60_desk/input_2/test_open_4.npz')
-    viz_comparison_syn()
+    #viz_comparison_syn()
     #check_expand("log/safe-50_test/model_20241231_123155/viz/101363050.npz")
+    get_segments_from_opalign()

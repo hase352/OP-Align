@@ -11,8 +11,8 @@ from viz import hat, ExpSO3, drct_rotation
 def viz_pt(file_path):
     data = torch.load(file_path)  # ファイル名は適宜変更
     
-    for key in data.keys():
-        print(key, ": ",data[key].shape, data[key].dtype , data[key])
+    # for key in data.keys():
+    #     print(key, ": ",data[key].shape, data[key].dtype , data[key])
     #print(data['idx'])
     pc = data['pc']  # 'pc'キーの点群データを取得
     label = data['label']
@@ -25,11 +25,11 @@ def viz_pt(file_path):
     label_np = label.numpy()
     direction_np = direction.numpy()
     pivot_np = pivot.numpy()
-    print(pivot_np)
+    # print(pivot_np)
     for i in range(3):
         if pivot_np[0] == 0:
             pivot_np[0] = 1e-15
-    print(pivot_np)
+    # print(pivot_np)
     
     joint_rotation = drct_rotation(torch.tensor(pivot_np, dtype=torch.float32).reshape(1,1,3)).reshape(3,3)
     j = o3d.geometry.TriangleMesh.create_arrow(cylinder_radius=0.0075, cone_radius=0.015, cylinder_height=0.3, cone_height=0.075)
@@ -65,6 +65,6 @@ def viz_pt(file_path):
     
 
 if __name__ == "__main__":
-    file_paths = glob.glob("dataset/pc/partial/safe-perct/4/test-10/101363_10p_joint_0.pt")
+    file_paths = glob.glob("/home/hasegawa/research/efficient_manip/OP_Align/dataset/pc/partial/safe-ours/full_1/101604/test-20/*.pt")
     for file_path in file_paths:
         viz_pt(file_path)

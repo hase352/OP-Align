@@ -9,7 +9,7 @@ import re
 """
 sapienでlabelを取ってくるが、label==2のlink がbaseにくっついている
 """
-PARTIAL_ROOT_PATH = "/home/akrobo/research/op_align/real/pc/partial"
+PARTIAL_ROOT_PATH = "/home/hasegawa/research/efficient_manip/OP_Align/real/pc/partial"
 
 def create_syn_data(points, rgba, labels, data_info: str, direction, pivot, per_object=False, hsaur_itr_num=-1):#hsaur_it_num!=-1 のならhsaur-opalignの結果
     data = torch.load(os.path.join(PARTIAL_ROOT_PATH,"safe/0.pt"))#必要ないデータを埋めるため
@@ -113,7 +113,7 @@ def create_syn_data(points, rgba, labels, data_info: str, direction, pivot, per_
             print("Save testdata: ", data_info + ".pt  to  " + dir_path)
             
     else:
-        dir_path = os.path.join(PARTIAL_ROOT_PATH, "safe-ours", "4", str(shape_id), "test-" + str(open_percentage))
+        dir_path = os.path.join(PARTIAL_ROOT_PATH, "safe-ours", "full_1", str(shape_id), "test-" + str(open_percentage))
         os.makedirs(dir_path, exist_ok=True)
         torch.save(data, os.path.join(dir_path, str(hsaur_itr_num) + ".pt"))
         print("Save testdata: ", str(hsaur_itr_num) + ".pt  to  " + dir_path)

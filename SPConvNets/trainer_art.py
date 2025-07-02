@@ -377,8 +377,10 @@ def val(dataset_test, dataset_train, model, metric, device, logger):
                 confidence_seg_0 += seg_scores[0][i]
                 n_seg_0 += 1
         confidence_all /= seg_scores.size(-1)
-        confidence_seg_0 /= n_seg_0
-        confidence_seg_1 /= n_seg_1
+        if n_seg_0 != 0:
+            confidence_seg_0 /= n_seg_0
+        if n_seg_1 != 0:
+            confidence_seg_1 /= n_seg_1
         all_confidence.append(torch.tensor([[confidence_all, confidence_seg_0, confidence_seg_1]]))
     mem_used_max_GB = torch.cuda.max_memory_allocated() / (1024*1024*1024)
     all_seg = torch.cat(all_seg, dim=0).detach().cpu()

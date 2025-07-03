@@ -11,7 +11,7 @@ sapienでlabelを取ってくるが、label==2のlink がbaseにくっついて�
 """
 PARTIAL_ROOT_PATH = "/home/hasegawa/research/efficient_manip/OP_Align/real/pc/partial"
 
-def create_syn_data(points, rgba, labels, data_info: str, direction, pivot, per_object=False, hsaur_itr_num=-1):#hsaur_it_num!=-1 のならhsaur-opalignの結果
+def create_syn_data(points, rgba, labels, data_info: str, direction, pivot, per_object=False, hsaur_itr_num=-1, dir_path=None):#hsaur_it_num!=-1 ならhsaur-opalignの結果
     data = torch.load(os.path.join(PARTIAL_ROOT_PATH,"safe/0.pt"))#必要ないデータを埋めるため
     shape_id = int(data_info.split("_")[0])
     open_percentage = int(re.findall(r'\d+',  data_info.split("_")[1])[0])
@@ -84,9 +84,9 @@ def create_syn_data(points, rgba, labels, data_info: str, direction, pivot, per_
     data['part_pv_point'] = torch.from_numpy(np.array([direction.astype(np.float32)]))
     #print([torch.from_numpy(pivot.astype(np.float32))])
     
-    # 全ての点群を追加してみる
-    data['full_pc'] = torch.from_numpy(points.astype(np.float32))
-    data['full_label'] = torch.from_numpy(labels.astype(np.int64))
+    # # 全ての点群を追加してみる。なんかエラー出る
+    # data['full_pc'] = torch.from_numpy(points.astype(np.float32))
+    # data['full_label'] = torch.from_numpy(labels.astype(np.int64))
     
     if hsaur_itr_num == -1:
         if per_object and str(shape_id) in ["101564", "101593", "101599",  "101604", "101605", "101611", 
@@ -113,7 +113,7 @@ def create_syn_data(points, rgba, labels, data_info: str, direction, pivot, per_
             print("Save testdata: ", data_info + ".pt  to  " + dir_path)
             
     else:
-        dir_path = os.path.join(PARTIAL_ROOT_PATH, "safe-ours", "full_1", str(shape_id), "test-" + str(open_percentage))
+        #dir_path = os.path.join(PARTIAL_ROOT_PATH, "safe-ours", "full_1", str(shape_id), "test-" + str(open_percentage)) 引数で定義してる
         os.makedirs(dir_path, exist_ok=True)
         torch.save(data, os.path.join(dir_path, str(hsaur_itr_num) + ".pt"))
         print("Save testdata: ", str(hsaur_itr_num) + ".pt  to  " + dir_path)

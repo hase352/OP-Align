@@ -21,12 +21,19 @@ class LightDataset(data.Dataset):
         #self.partial = partial
         self.partial = True
         self.args = args
-        if self.partial:
-            self.shape_root = os.path.join(self.root, 'partial', shape_type)
-        else:
-            self.shape_root = os.path.join(self.root, 'full', shape_type)
-        self.instance_list = glob(os.path.join(self.root, 'partial/safe-perct', '4', '*', '*.pt'))
-        print(self.shape_root, split)
+
+        if args and hasattr(args, 'instance_list_path'):
+            self.instance_list = args.instance_list_path
+            print("aaaa")
+        else: 
+            print("b")
+            if self.partial:
+                self.shape_root = os.path.join(self.root, 'partial', shape_type)
+            else:
+                self.shape_root = os.path.join(self.root, 'full', shape_type)
+            self.instance_list = glob(os.path.join(self.root, 'partial/safe-perct', '4', '*', '*.pt'))
+            self.instance_list = glob(os.path.join("/home/hasegawa/research/efficient_manip/OP_Align/dataset/pc", 'partial/safe-ours', "full_3", '*', '*', '*.pt'))
+            print(self.shape_root, split)
 
         if len(self.instance_list) == 0:
             print("Check the category name!")

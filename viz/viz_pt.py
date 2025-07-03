@@ -11,8 +11,8 @@ from viz import hat, ExpSO3, drct_rotation
 def viz_pt(file_path):
     data = torch.load(file_path)  # ファイル名は適宜変更
     
-    # for key in data.keys():
-    #     print(key, ": ",data[key].shape, data[key].dtype , data[key])
+    for key in data.keys():
+        print(key, ": ",data[key].shape, data[key].dtype , data[key])
     #print(data['idx'])
     pc = data['pc']  # 'pc'キーの点群データを取得
     label = data['label']
@@ -65,6 +65,6 @@ def viz_pt(file_path):
     
 
 if __name__ == "__main__":
-    file_paths = glob.glob("/home/hasegawa/research/efficient_manip/OP_Align/dataset/pc/partial/safe-ours/full_1/101604/test-20/*.pt")
+    file_paths = glob.glob("/home/hasegawa/research/efficient_manip/OP_Align/dataset/pc/partial/safe-ours/4/101603/test-0/0.pt")
     for file_path in file_paths:
         viz_pt(file_path)

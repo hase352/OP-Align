@@ -33,6 +33,7 @@ class LightDataset(data.Dataset):
                 self.shape_root = os.path.join(self.root, 'full', shape_type)
             self.instance_list = glob(os.path.join(self.root, 'partial/safe-perct', '4', '*', '*.pt'))
             self.instance_list = glob(os.path.join("/home/hasegawa/research/efficient_manip/OP_Align/dataset/pc", 'partial/safe-ours', "full_3", '*', '*', '*.pt'))
+            self.instance_list = glob(os.path.join("/home/hasegawa/research/efficient_manip/OP_Align", "real", "pc", "partial", "safe", "test-op", "*.pt"))
             print(self.shape_root, split)
 
         if len(self.instance_list) == 0:

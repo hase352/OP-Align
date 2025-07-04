@@ -32,8 +32,7 @@ def create_syn_data(points, rgba, labels, data_info: str, direction, pivot, per_
 
     # 4. ダウンサンプリング後の点群をNumPy配列に変換
     downsampled_points = np.asarray(downsampled_point_cloud.points)
-    #print("ダウンサンプル後",downsampled_points.shape)
-    
+    #print("ダウンサン"*",
     indices = []
     for point in downsampled_points:
         id = np.argmin(np.linalg.norm(points - point, axis=1))

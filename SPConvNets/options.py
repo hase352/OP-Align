@@ -4,6 +4,13 @@ import vgtk
 
 parser = vgtk.HierarchyArgmentParser()
 
+#hsaur aruments
+hsaur_args = parser.add_parser("hsaur")
+hsaur_args.add_argument('--test_type', type=str, default="Safe", help='Test type.')
+hsaur_args.add_argument("--test_size", default="l", choices=["s", "m", "l", "c", "h", "o", "n", "a"], type=str)
+hsaur_args.add_argument("--n_process", default=None, type=int)
+
+
 ######### Experiment arguments
 exp_args = parser.add_parser("experiment")
 exp_args.add_argument('--experiment-id', type=str, default='playground',

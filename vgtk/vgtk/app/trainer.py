@@ -14,8 +14,12 @@ from torch.utils.tensorboard import SummaryWriter
 
 # TODO add dataparallel
 # TODO add the_world = ipdb.set_trace
+# LOG_PATH = os.path.join("/home/hasegawa/research/efficient_manip/OP_Align/log", 'log.txt')
+# LOGGER = vgtk.Logger(log_file=LOG_PATH)
 
 class Trainer():
+    _global_logger = None  # クラス変数として持つ（グローバルに1回だけ作られる）
+
     def __init__(self, opt):
         super(Trainer, self).__init__()
 
@@ -30,21 +34,33 @@ class Trainer():
         torch.cuda.manual_seed_all(self.opt.seed)
         # np.set_printoptions(precision=3, suppress=True)
 
+      
         # create model dir
         experiment_id = self.opt.experiment_id if self.opt.mode == 'train' else f"{self.opt.experiment_id}_{self.opt.mode}"
         model_id = f'model_{time.strftime("%Y%m%d_%H%M%S")}'
         self.root_dir = os.path.join(self.opt.model_dir, experiment_id, model_id)
         os.makedirs(self.root_dir, exist_ok=True)
 
+        # ロガー初期化：すでに初期化済みなら使い回す
+        if Trainer._global_logger is None:
+            log_path = os.path.join(self.root_dir, 'log.txt')
+            Trainer._global_logger = vgtk.Logger(log_file=log_path)
+            Trainer._global_logger.log('Setup', 'Logger initialized for Trainer.')
+        else:
+            Trainer._global_logger.log('Setup', 'Logger reused.')
+
+        self.logger = Trainer._global_logger  # インスタンスからもアクセス可能に
+
         # saving opt
         opt_path = os.path.join(self.root_dir, 'opt.json')
         # TODO: hierarchical args are not compatible wit json dump
         with open(opt_path, 'w') as fout:
-            json.dump(opt_dict, fout, indent=2)
+            json.dump(opt_dict, fout, indent=2, default=str)
 
         # create logger
-        log_path = os.path.join(self.root_dir, 'log.txt')
-        self.logger = vgtk.Logger(log_file=log_path)
+        # log_path = os.path.join(self.root_dir, 'log.txt')
+        # self.logger = vgtk.Logger(log_file=log_path)
+        #self.logger = LOGGER
         self.logger.log('Setup', f'Logger created! Hello World!')
         self.logger.log('Setup', f'Random seed has been set to {self.opt.seed}')
         self.logger.log('Setup', f'Experiment id: {experiment_id}')

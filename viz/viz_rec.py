@@ -151,10 +151,10 @@ def main(path:str):
     recon_pcl.points = o3d.utility.Vector3dVector(recon)
     recon_pcl.colors = o3d.utility.Vector3dVector(recon_color)
 
-    #o3d.visualization.draw_geometries([inputa], window_name="input")
+    o3d.visualization.draw_geometries([inputa], window_name="input")
     o3d.visualization.draw_geometries([input_pcl, *recon_joints],window_name=path+"object level align")
-    #o3d.visualization.draw_geometries([align2_0_pcl, align2_1_pcl, *recon_joints], window_name="part level align")
-    #o3d.visualization.draw_geometries([recon_pcl, *recon_joints],window_name="recon")
+    o3d.visualization.draw_geometries([align2_0_pcl, align2_1_pcl, *recon_joints], window_name="part level align")
+    o3d.visualization.draw_geometries([recon_pcl, *recon_joints],window_name="recon")
 
 if __name__ == "__main__":
     dataset = "dataset/pc/partial/safe/test/101363_50p_joint_0.pt"
@@ -163,7 +163,7 @@ if __name__ == "__main__":
     if dataset in instance_name_list:
         index = instance_name_list.index(dataset)
     #print("index:",index)
-    file_paths = glob("log/safe-perct-3_test/viz/101605050.npz")
+    file_paths = glob("/home/hasegawa/research/efficient_manip/OP_Align/log/safe_test/model_20250703_185510/viz/102311000.npz")
     for file_path in file_paths:
         #print(file_path)
         main(file_path)

@@ -173,8 +173,9 @@ def get_so3_from_anchors_np_zyz(face_normals, gsize=3):
     na = face_normals.shape[0]
     cbeta = face_normals[...,-1]
     sbeta = (1 - cbeta**2)**0.5
-    calpha = face_normals[...,0] / sbeta
-    salpha = face_normals[...,1] / sbeta
+    with np.errstate(all='ignore'):
+        calpha = face_normals[...,0] / sbeta
+        salpha = face_normals[...,1] / sbeta
 
     if gsize==5:
         calpha = np.where(np.isnan(calpha) & (cbeta>0), np.ones_like(calpha), calpha)

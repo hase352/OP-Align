@@ -17,6 +17,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 class Trainer():
     _global_logger = None  # クラス変数として持つ（グローバルに1回だけ作られる）
+    _model_id = f'model_{time.strftime("%Y%m%d_%H%M%S")}'
 
     def __init__(self, opt):
         super(Trainer, self).__init__()
@@ -35,8 +36,8 @@ class Trainer():
       
         # create model dir
         experiment_id = self.opt.experiment_id if self.opt.mode == 'train' else f"{self.opt.experiment_id}_{self.opt.mode}"
-        model_id = f'model_{time.strftime("%Y%m%d_%H%M%S")}'
-        self.root_dir = os.path.join(self.opt.model_dir, experiment_id, model_id)
+        # model_id = f'model_{time.strftime("%Y%m%d_%H%M%S")}'
+        self.root_dir = os.path.join(self.opt.model_dir, experiment_id, Trainer._model_id)
         os.makedirs(self.root_dir, exist_ok=True)
 
         # ロガー初期化：すでに初期化済みなら使い回す
@@ -44,6 +45,8 @@ class Trainer():
             log_path = os.path.join(self.root_dir, 'log.txt')
             Trainer._global_logger = vgtk.Logger(log_file=log_path)
             Trainer._global_logger.log('Setup', 'Logger initialized for Trainer.')
+            Trainer._global_logger.log('Setup', f'Logger created! Hello World!')
+            Trainer._global_logger.log('Setup', f'Random seed has been set to {self.opt.seed}')
         else:
             Trainer._global_logger.log('Setup', 'Logger reused.')
 
@@ -59,10 +62,8 @@ class Trainer():
         # log_path = os.path.join(self.root_dir, 'log.txt')
         # self.logger = vgtk.Logger(log_file=log_path)
         #self.logger = LOGGER
-        self.logger.log('Setup', f'Logger created! Hello World!')
-        self.logger.log('Setup', f'Random seed has been set to {self.opt.seed}')
         self.logger.log('Setup', f'Experiment id: {experiment_id}')
-        self.logger.log('Setup', f'Model id: {model_id}')
+        self.logger.log('Setup', f'Model id: {self._model_id}')
 
         # ckpt dir
         self.ckpt_dir = os.path.join(self.root_dir, 'ckpt')
@@ -274,8 +275,11 @@ class Trainer():
         else:
             header = "idx, time, seg_0, seg_1, seg_2, joint_0, joint_1, direction_0, direction_1, rotation_0, rotation_1, rotation_2, translation_0, translation_1, translation_2"
         header = header.replace(' ', '').split(',')
-        df = pd.DataFrame(csv)
-        df.to_csv(save_path, header=header, index=False)
+        df = pd.DataFrame(csv, columns=header)
+
+        # 既存ファイルの確認
+        file_exists = os.path.exists(save_path)
+        df.to_csv(save_path, mode='a', header=not file_exists, index=False)
         return
     
     def _save_viz(self, viz):

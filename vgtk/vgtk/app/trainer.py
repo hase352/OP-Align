@@ -14,8 +14,6 @@ from torch.utils.tensorboard import SummaryWriter
 
 # TODO add dataparallel
 # TODO add the_world = ipdb.set_trace
-# LOG_PATH = os.path.join("/home/hasegawa/research/efficient_manip/OP_Align/log", 'log.txt')
-# LOGGER = vgtk.Logger(log_file=LOG_PATH)
 
 class Trainer():
     _global_logger = None  # クラス変数として持つ（グローバルに1回だけ作られる）

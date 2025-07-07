@@ -29,7 +29,9 @@ class LightDataset(data.Dataset):
                 self.shape_root = os.path.join(self.root, 'partial', shape_type)
             else:
                 self.shape_root = os.path.join(self.root, 'full', shape_type)
-            self.instance_list = glob(os.path.join(self.root, 'partial/safe-perct', '4', '*', '*.pt'))
+            #self.instance_list = glob(os.path.join(self.root, 'partial/safe-perct', '4', '*', '*.pt'))
+            self.instance_list = os.path.join(self.root, 'partial', shape_type)
+            
 
         if len(self.instance_list) == 0:
             print("Check the category name!")

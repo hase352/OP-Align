@@ -9,9 +9,12 @@ import re
 """
 sapienでlabelを取ってくるが、label==2のlink がbaseにくっついている
 """
-PARTIAL_ROOT_PATH = "/home/hasegawa/research/efficient_manip/OP_Align/real/pc/partial"
+PARTIAL_ROOT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),"real/pc/partial")
+
 
 def create_syn_data(points, rgba, labels, data_info: str, direction, pivot, per_object=False, hsaur_itr_num=-1, dir_path=None):#hsaur_it_num!=-1 ならhsaur-opalignの結果
+    print(os.path.dirname(os.path.abspath(__file__)))
+    # data = torch.load(os.path.join(PARTIAL_ROOT_PATH,"safe/0.pt"))#必要ないデータを埋めるため
     data = torch.load(os.path.join(PARTIAL_ROOT_PATH,"safe/0.pt"))#必要ないデータを埋めるため
     shape_id = int(data_info.split("_")[0])
     open_percentage = int(re.findall(r'\d+',  data_info.split("_")[1])[0])

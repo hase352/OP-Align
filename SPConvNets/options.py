@@ -1,5 +1,5 @@
 
-import vgtk
+import vgtk, os
 
 
 parser = vgtk.HierarchyArgmentParser()
@@ -19,7 +19,7 @@ exp_args.add_argument('-d', '--dataset-path', type=str, default='dataset',
                       help='path to datasets')
 exp_args.add_argument('--dataset', type=str, default='kpts',
                       help='name of the datasets')    # used in 3d match
-exp_args.add_argument('--model-dir', type=str, default='/home/hasegawa/research/efficient_manip/OP_Align/log',
+exp_args.add_argument('--model-dir', type=str, default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "log"),
                       help='path to models (the root of all outputs)')
 exp_args.add_argument('-s', '--seed', type=int, default=1234,
                       help='random seed')

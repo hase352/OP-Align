@@ -287,5 +287,6 @@ class Trainer():
         for i in range(L):
             cur_f = viz[i]
             save_path = os.path.join(self.root_dir, 'viz', str(cur_f['idx'].item()).zfill(5) + '.npz')
+            print(f'Saving viz to {save_path}')
             np.savez_compressed(save_path, cur_f)
         return

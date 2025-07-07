@@ -279,8 +279,8 @@ class Trainer(vgtk.Trainer):
         if acc_score > self.best_acc or self.best_acc == 0:
             self.best_acc = acc_score
             best_model = True
-            self._save_csv(csv)
-            self._save_viz(viz_file)
+        self._save_csv(csv)
+        self._save_viz(viz_file)
 
         self.model.train()
         self.metric.train()
@@ -307,6 +307,11 @@ class Trainer(vgtk.Trainer):
                 if best_model:
                     self.logger.log('Testing', 'Best model Update.')
                     self._save_network('best')
+
+    def update_instance_list_path(self, new_path):
+        """Update the instance_list_path and reload the dataset."""
+        self.opt.instance_list_path = new_path
+        self._setup_datasets()
 
 def val(dataset_test, dataset_train, model, metric, device, logger):
 

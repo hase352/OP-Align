@@ -38,20 +38,9 @@ def viz_pt(file_path):
     j.translate(direction_np.astype(np.float64))
     j.paint_uniform_color([0,0,0])
     
-    num_labels = len(np.unique(label_np))  # ラベルの種類数
-    unique_labels = np.unique(label_np)
-    #print(num_labels, unique_labels)
-    label_np -= min(unique_labels)
-    unique_labels -= min(unique_labels)
-    #print(label_np)
+   
 
-    # ラベルごとに色を設定（カラーマップを使用）
-    colormap = plt.get_cmap("tab10")  # カラーマップを変更してコントラストを強調
-    #label_colors = colormap(unique_labels / (num_labels - 1))[:, :3]  # RGB値を取得
-    label_colors = colormap(np.arange(num_labels) / (num_labels - 1))[:, :3]  # RGB値を取得
-
-    # ラベルに対応する色を割り当て
-    rgb_colors = np.array([label_colors[np.where(unique_labels == label)[0][0]] for label in label_np])
+    rgb_colors = np.array([[0, 0, 1] if label == 0 else [1, 0, 0] for label in label_np])
 
     # Open3D PointCloud オブジェクトを作成
     point_cloud = o3d.geometry.PointCloud()
@@ -65,6 +54,6 @@ def viz_pt(file_path):
     
 
 if __name__ == "__main__":
-    file_paths = glob.glob("/home/hasegawa/research/efficient_manip/OP_Align/dataset/pc/partial/safe-ours/4/101603/test-0/0.pt")
+    file_paths = glob.glob("/home/hasegawa/research/efficient_manip/OP_Align/real/pc/partial/safe-ours/data_20250707_191122/101591/test-30/4.pt")
     for file_path in file_paths:
         viz_pt(file_path)
